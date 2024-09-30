@@ -83,7 +83,3 @@ The smart contract follows the ERC721 standard provided by OpenZeppelin, allowin
 - Add more battle mechanics, such as attack types and weaknesses.
 - Implement a more robust marketplace to allow for Pokémon auctions and trades.
 - Add a front-end interface to make interaction with the smart contract easier.
-
-## License
-
-This project is licensed under the terms of the GPL-3.0 license.
