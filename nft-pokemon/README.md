@@ -1,108 +1,63 @@
 
 # Pokemon NFT Game
 
-This project implements an NFT-based Pokémon battle game on the Ethereum blockchain. Each Pokémon is represented as an ERC721 token (NFT), and players can battle their Pokémon to increase their levels. The project leverages several blockchain development tools such as Remix IDE, Ganache, MetaMask, and IPFS.
+This project implements a Pokémon battle game based on NFTs on the Ethereum blockchain. Each Pokémon is represented as a unique ERC721 token, and players can create new Pokémon and battle to increase their levels. The project uses smart contracts developed in Solidity and several Web3 tools, such as IPFS to store Pokémon images, MetaMask to interact with the blockchain, and Ganache to simulate local transactions on the Ethereum network.
+
+## Improvements Implemented
+
+1. **Limited Creation of New Pokémon**: Players can now create up to 3 Pokémon each. The game owner can continue creating unlimited Pokémon.
+2. **Enhanced Battle Mechanics**: The battle mechanics have been improved to include attack, defense, and Pokémon types. Battles now take these factors into account to determine the outcome.
+3. **IPFS Integration**: Pokémon images are stored on IPFS, and only the IPFS CID is stored in the contract, making the storage decentralized and efficient.
+4. **Basic Marketplace**: Players can now list their Pokémon for sale, and other players can purchase them using Ether.
+5. **Enhanced Security**: The contract now uses the `ReentrancyGuard` security standard to protect against reentrancy attacks.
 
 ## Features
 
-- **Create New Pokémon**: The game owner can create new Pokémon by specifying their name and an image URL. Each Pokémon starts at level 1.
-- **Battle Mechanism**: Pokémon can battle with each other. Depending on the outcome of the battle, their levels will increase.
-- **Ownership Mechanism**: Only the owner of a specific Pokémon can initiate a battle involving that Pokémon.
+- **Create New Pokémon**: The game owner or players (with a limit of 3 per user) can create new Pokémon, specifying name, image (via IPFS), attack, defense, and type.
+- **Battle**: Pokémon can battle against each other, and the winners gain level points.
+- **Buy and Sell Pokémon**: Players can list their Pokémon for sale, and other players can purchase them with Ether.
 
 ## Tools Used
 
-- **Solidity**: Programming language used for developing the smart contract.
-- **Remix IDE**: Browser-based IDE used for writing, deploying, and testing the smart contract.
+- **Solidity**: The programming language used to develop the smart contract.
+- **Remix IDE**: A browser-based IDE used to write, compile, and deploy the contract.
 - **Ganache**: Local Ethereum blockchain used for development and testing.
 - **MetaMask**: Browser extension used to interact with the blockchain and sign transactions.
-- **IPFS**: Decentralized storage system for storing the Pokémon images.
+- **IPFS**: Decentralized storage system used to store Pokémon images.
 
-## Smart Contract
+## Contract Code
 
-The smart contract follows the ERC721 standard provided by OpenZeppelin, which allows each Pokémon to be represented as a unique token.
+The smart contract follows the ERC721 standard provided by OpenZeppelin, allowing each Pokémon to be represented as a unique token.
 
 ### Key Components
 
-- **Struct Pokemon**: Represents a Pokémon with a name, level, and image.
+- **Pokemon Struct**: Each Pokémon has a name, level, attack, defense, type, and an image stored on IPFS.
   
   ```solidity
   struct Pokemon {
       string name;
       uint level;
-      string img;
+      uint attack;
+      uint defense;
+      string pokemonType;
+      string imgCid; // IPFS CID for the Pokemon image
   }
   ```
 
-- **Modifiers**: Includes the `onlyOwnerOf` modifier to ensure that only the owner of a Pokémon can initiate a battle with it.
+- **Battle Mechanics**: Pokémon can battle against each other, taking into account attack, defense, and types.
 
-  ```solidity
-  modifier onlyOwnerOf(uint _monsterId) {
-      require(ownerOf(_monsterId) == msg.sender, "Apenas o dono pode batalhar com este Pokemon");
-      _;
-  }
-  ```
+- **Marketplace**: Players can buy and sell Pokémon.
 
-- **Functions**:
-  - `createNewPokemon`: Allows the game owner to create new Pokémon and mint them as NFTs.
-  - `battle`: Allows a player to battle their Pokémon against another Pokémon. The winning Pokémon gains more experience.
-
-### Contract Code
-
-```solidity
-// SPDX-License-Identifier: GPL-3.0
-pragma solidity ^0.8.0;
-
-import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
-
-contract Pokemon is ERC721 {
-    struct Pokemon {
-        string name;
-        uint level;
-        string img;
-    }
-
-    Pokemon[] public pokemons;
-    address public gameOwner;
-
-    constructor () ERC721 ("Pokemon", "PKD") {
-        gameOwner = msg.sender;
-    }
-
-    modifier onlyOwnerOf(uint _monsterId) {
-        require(ownerOf(_monsterId) == msg.sender, "Apenas o dono pode batalhar com este Pokemon");
-        _;
-    }
-
-    function battle(uint _attackingPokemon, uint _defendingPokemon) public onlyOwnerOf(_attackingPokemon) {
-        Pokemon storage attacker = pokemons[_attackingPokemon];
-        Pokemon storage defender = pokemons[_defendingPokemon];
-
-        if (attacker.level >= defender.level) {
-            attacker.level += 2;
-            defender.level += 1;
-        } else {
-            attacker.level += 1;
-            defender.level += 2;
-        }
-    }
-
-    function createNewPokemon(string memory _name, address _to, string memory _img) public {
-        require(msg.sender == gameOwner, "Apenas o dono do jogo pode criar novos Pokemons");
-        uint id = pokemons.length;
-        pokemons.push(Pokemon(_name, 1, _img));
-        _safeMint(_to, id);
-    }
-}
-```
+- **Events**: Events are emitted whenever a Pokémon is created or a battle occurs.
 
 ## How to Deploy and Run
 
 ### Prerequisites
 
-1. **Node.js**: Ensure that you have Node.js installed to use tools like `npm`.
+1. **Node.js**: Ensure Node.js is installed to use tools like `npm`.
 2. **Remix IDE**: Use [Remix](https://remix.ethereum.org/) to write, compile, and deploy the contract.
-3. **Ganache**: Download and set up [Ganache](https://trufflesuite.com/ganache/) to simulate a local Ethereum blockchain for testing.
-4. **MetaMask**: Install the [MetaMask](https://metamask.io/) browser extension for interacting with the deployed contract.
+3. **Ganache**: Download and set up [Ganache](https://trufflesuite.com/ganache/) to simulate a local Ethereum blockchain.
+4. **MetaMask**: Install the [MetaMask](https://metamask.io/) browser extension to interact with the deployed contract.
 
 ### Steps
 
@@ -116,20 +71,19 @@ contract Pokemon is ERC721 {
    - Deploy the contract from the Remix interface.
 
 3. **Interact with the Contract**:
-   - Once deployed, you can interact with the contract directly through the Remix interface or by creating a front-end.
-   - Use MetaMask to send transactions and perform actions like creating new Pokémon or battling with them.
+   - Once deployed, you can interact with the contract directly through the Remix interface or via a front-end application.
+   - Use MetaMask to send transactions and perform actions like creating new Pokémon or battling.
 
-4. **Use IPFS for Image Storage**:
-   - Upload Pokémon images to IPFS.
-   - Store the IPFS URL of the image in the contract when creating a new Pokémon.
+4. **Use IPFS to Store Images**:
+   - Upload the Pokémon images to IPFS.
+   - Store the returned CID in the contract when creating new Pokémon.
 
-## Future Enhancements
+## Future Improvements
 
-- Add more battle mechanics such as attack types and weaknesses.
-- Implement a marketplace for trading Pokémon.
-- Add more metadata to each Pokémon, such as health points (HP) and special abilities.
-- Develop a front-end using React or another JavaScript framework to allow easier interaction with the smart contract.
+- Add more battle mechanics, such as attack types and weaknesses.
+- Implement a more robust marketplace to allow for Pokémon auctions and trades.
+- Add a front-end interface to make interaction with the smart contract easier.
 
-<!-- ## License
+## License
 
-This project is licensed under the terms of the GPL-3.0 license. -->
+This project is licensed under the terms of the GPL-3.0 license.
